@@ -1,0 +1,20 @@
+---
+# Main PlayBook
+
+- name: Common configuration for Debian
+  sudo: yes
+  remote_user: ansible-bot
+  roles:
+    - ssh
+
+- name: Common configuration for RedHat
+  sudo: yes
+  remote_user: ansible-bot
+  roles:
+    - ssh
+
+- name: Common configuration for CentOS
+  sudo: yes
+  remote_user: ansible-bot
+  roles:
+    - ssh
