@@ -17,10 +17,3 @@
     - ssh
     - firewall
 
-- name: Configuration for CentOS
-  sudo: yes
-  remote_user: root
-  hosts: centos
-  roles:
-    - ssh
-    - firewall

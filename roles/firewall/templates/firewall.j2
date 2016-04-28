@@ -1,7 +1,6 @@
 #! /bin/sh
 # /etc/init.d/firewall
-#
-# Firewall init script, to be used with /etc/firewall.bash by Jeff Geerling.
+
 ### BEGIN INIT INFO
 # Provides:          firewall
 # Required-Start:    $remote_fs $syslog
@@ -12,18 +11,17 @@
 # Description:       Enable the firewall.
 ### END INIT INFO
 
-# Carry out specific functions when asked to by the system
 case "$1" in
   start)
-    echo "Starting firewall."
+    echo "Start firewall."
     /etc/firewall.bash
     ;;
   stop)
-    echo "Stopping firewall."
+    echo "Stop firewall."
     iptables -F
     ;;
   restart)
-    echo "Restarting firewall."
+    echo "Restart firewall."
     /etc/firewall.bash
     ;;
   status)
