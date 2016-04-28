@@ -1,52 +1,23 @@
 ---
-- name: add the OS specific variables
-  include_vars: "{{ ansible_os_family }}.yml"
+- name: add pubkey to authorized_keys on host
+  authorized_key: user={{ ssh_user }}
+    key="{{ lookup('file', '../../../adrien.pub') }}"
+  register: add_identity_key
+  when: ssh_identity_key is defined and ssh_user is defined
 
-- name: test to see if selinux is running
-  command: getenforce
-  register: sestatus
-  changed_when: false
-  ignore_errors: true
-
-- name: check the ssh_password policy state
-  shell: semodule -l | grep "ssh_password" | awk '{print $3}' 
-  register: selinux_policy_state
-  when: sestatus.rc == 0 and sestatus.stdout != 'Disabled'
-  changed_when: false
-
-- name: create sshd_config and set permissions to root/600
-  template: src='opensshd.conf.j2' dest='/etc/ssh/sshd_config' mode=0600 owner=root group=root validate="/usr/sbin/sshd -T -f %s"
+- name: Disable empty passwd login
+  lineinfile: dest={{ sshd_config }} regexp="^#?PermitEmptyPasswords" line="PermitEmptyPasswords no"
   notify: restart sshd
-  when: ssh_server_hardening
 
-- name: create ssh_config and set permissions to root/644
-  template: src='openssh.conf.j2' dest='/etc/ssh/ssh_config' mode=0644 owner=root group=root
-  when: ssh_client_hardening
+- name: Disable remote root login
+  lineinfile: dest={{ sshd_config }} regexp="^#?PermitRootLogin" line="PermitRootLogin no"
+  notify: restart sshd
 
-- name: Create selinux custom policy drop folder
-  file: path={{ ssh_custom_selinux_dir }} state=directory owner=root group=root mode=0750
-  when: not ssh_use_pam and sestatus.rc == 0 and sestatus.stdout != 'Disabled'
+- name: Disable passwd login
+  lineinfile: dest={{ sshd_config }} regexp="^#?PasswordAuthentication" line="PasswordAuthentication no"
+  when: add_identity_key|success and not add_identity_key|skipped
+  notify: restart sshd
 
-# The following tasks only get executed when selinux is in state enforcing and UsePam is "no".
-# See this issue for more info: https://github.com/hardening-io/ansible-ssh-hardening/issues/23
-
-- name: Distributing custom selinux policies
-  copy: src='ssh_password' dest='{{ ssh_custom_selinux_dir }}'
-  register: custom_policies_output
-  when: not ssh_use_pam and sestatus.rc == 0 and sestatus.stdout != 'Disabled'
-
-- name: check and compile policy
-  shell: checkmodule -M -m -o {{ ssh_custom_selinux_dir }}/ssh_password.mod {{ ssh_custom_selinux_dir }}/ssh_password
-  when: not ssh_use_pam and sestatus.rc == 0 and sestatus.stdout != 'Disabled'
-
-- name: create selinux policy module package
-  shell: semodule_package -o {{ ssh_custom_selinux_dir }}/ssh_password.pp  -m {{ ssh_custom_selinux_dir }}/ssh_password.mod
-  when: not ssh_use_pam and sestatus.rc == 0 and sestatus.stdout != 'Disabled'
-
-- name: install selinux policy
-  shell: semodule -i {{ ssh_custom_selinux_dir }}/ssh_password.pp
-  when: not ssh_use_pam and sestatus.rc == 0 and sestatus.stdout != 'Disabled'
-
-- name: remove selinux-policy when Pam is used, because Allowing sshd to read the shadow file directly is considered a potential security risk (http://danwalsh.livejournal.com/12333.html)
-  shell: semodule -r ssh_password
-  when: sestatus.rc == 0 and ssh_use_pam
+- name: Enable PAM auth
+  lineinfile: dest={{ sshd_config }} regexp="^#?UsePAM" line="UsePAM yes"
+  notify: restart sshd
