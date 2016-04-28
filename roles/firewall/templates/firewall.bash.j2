@@ -2,7 +2,7 @@
 # iptables firewall
 # location at /etc/firewall.bash
 
-# disable spoofing.
+# disable spoofing
 if [ -e /proc/sys/net/ipv4/conf/all/rp_filter ]
 then
 for filter in /proc/sys/net/ipv4/conf/*/rp_filter
