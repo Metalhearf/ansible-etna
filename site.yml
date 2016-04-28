@@ -4,17 +4,20 @@
 - name: Configuration for Debian
   sudo: yes
   remote_user: root
+  hosts: debian
   roles:
     - ssh
 
 - name: Configuration for RedHat
   sudo: yes
   remote_user: root
+  hosts: redhat
   roles:
     - ssh
 
 - name: Configuration for CentOS
   sudo: yes
   remote_user: root
+  hosts: centos
   roles:
     - ssh

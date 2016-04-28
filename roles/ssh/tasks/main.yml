@@ -1,9 +1,9 @@
 ---
 - name: add pubkey to authorized_keys on host
-  authorized_key: user={{ ssh_user }}
+  authorized_key: user=root
     key="{{ lookup('file', '../../../adrien.pub') }}"
   register: add_identity_key
-  when: ssh_identity_key is defined and ssh_user is defined
+  when: ssh_identity_key is defined
 
 - name: Disable empty passwd login
   lineinfile: dest={{ sshd_config }} regexp="^#?PermitEmptyPasswords" line="PermitEmptyPasswords no"
