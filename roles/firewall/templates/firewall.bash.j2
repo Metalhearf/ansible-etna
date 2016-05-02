@@ -18,18 +18,6 @@ iptables -X
 # Accept traffic from loopback interface (localhost).
 iptables -A INPUT -i lo -j ACCEPT
 
-{# TCP fwd Ports #}
-{% for forwarded_port in firewall_forwarded_tcp_ports %}
-iptables -t nat -I PREROUTING -p tcp --dport {{ forwarded_port.src }} -j REDIRECT --to-port {{ forwarded_port.dest }}
-iptables -t nat -I OUTPUT -p tcp -o lo --dport {{ forwarded_port.src }} -j REDIRECT --to-port {{ forwarded_port.dest }}
-{% endfor %}
-
-{# UDP fwd Ports #}
-{% for forwarded_port in firewall_forwarded_udp_ports %}
-iptables -t nat -I PREROUTING -p udp --dport {{ forwarded_port.src }} -j REDIRECT --to-port {{ forwarded_port.dest }}
-iptables -t nat -I OUTPUT -p udp -o lo --dport {{ forwarded_port.src }} -j REDIRECT --to-port {{ forwarded_port.dest }}
-{% endfor %}
-
 {# TCP Open Ports #}
 {% for port in firewall_allowed_tcp_ports %}
 iptables -A INPUT -p tcp -m tcp --dport {{ port }} -j ACCEPT
@@ -50,5 +38,5 @@ iptables -A INPUT -p udp --sport 123 -j ACCEPT
 # Allow OK and established connexions
 iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
 
-# Drop every other traffic
+# Drop other traffic
 iptables -A INPUT -j DROP
