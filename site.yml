@@ -6,9 +6,11 @@
   remote_user: root
   hosts: debian
   roles:
+    - common
     - ssh
     - firewall
     - fail2ban
+    - network
   vars:
     - firewall_ssh_port: 2222
 
@@ -17,9 +19,11 @@
   remote_user: root
   hosts: redhat
   roles:
+    - common
     - ssh
     - firewall
     - fail2ban
+    - network
   vars:
     - firewall_ssh_port: 2222
 
