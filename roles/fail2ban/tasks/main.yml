@@ -2,7 +2,7 @@
   when: ansible_os_family == "Debian"
 
 - include: pkg-redhat.yml
-  when: ansible_os_family == "Redhat"
+  when: ansible_os_family == "RedHat"
 
 - name: BACKUP original Datadog's config. file
   copy: src="/etc/fail2ban/jail.conf" dest="/etc/fail2ban/jail.conf.bak" owner="root" group="root" mode=0640

@@ -1,0 +1,10 @@
+---
+
+- name: purge package xinetd
+  yum: name=xinetd state=absent
+
+- name: purge package inetd
+  yum: name=inetd state=absent
+
+- name: purge telnet-server
+  yum: name=telnet-server state=absent

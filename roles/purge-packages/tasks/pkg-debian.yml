@@ -1,0 +1,10 @@
+---
+
+- name: purge package xinetd
+  apt: name=xinetd state=absent autoremove=yes
+
+- name: purge package inetd
+  apt: name=inetd state=absent autoremove=yes
+
+- name: purge telnet-server
+  apt: name=telnet-server state=absent autoremove=yes
