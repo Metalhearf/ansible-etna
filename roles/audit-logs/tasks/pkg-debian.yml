@@ -1,0 +1,7 @@
+---
+
+  - name: install rsyslog
+    apt: name=rsyslog state=latest update_cache=yes
+
+  - name: install auditd Service
+    apt: name=auditd state=present

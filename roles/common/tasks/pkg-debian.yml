@@ -1,0 +1,7 @@
+---
+
+  - name: check apt-get update
+    apt: update_cache=yes
+
+  - name: apt-get upgrade
+    apt: upgrade=yes

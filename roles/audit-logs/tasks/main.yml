@@ -1,0 +1,40 @@
+---
+
+  - name: install rsyslog for debian
+    include: pkg-debian.yml
+    when: ansible_os_family == "Debian"
+
+  - name: install rsyslog for redhat
+    include: pkg-redhat.yml
+    when: ansible_os_family == "RedHat"
+
+  - name: check if auditd.conf exists
+    stat: path=/etc/audit/auditd.conf
+    register: auditdconf
+
+  - name: create audit dir if it doesnt exists
+    file: path=/etc/audit state=directory
+    when: not auditdconf.stat.exists
+
+  - name: keep data
+    lineinfile: dest=/etc/audit/auditd.conf regexp="{{ item.regexp }}" line="{{ item.text }}" state=present create=yes
+    with_items:
+        - { regexp: '^max_log_file ', text: 'max_log_file = {{ max_log_file_auditd }}' }
+        - { regexp: '^action_mail_acct', text: 'action_mail_acct = root' }
+        - { regexp: '^space_left_action', text: 'space_left_action = email' }
+        - { regexp: '^max_log_file_action', text: 'max_log_file_action = keep_logs' }
+        - { regexp: '^admin_space_left_action', text: 'admin_space_left_action = halt' }
+    notify: restart auditd
+
+  - name: record event modifying user or group info
+    lineinfile: dest=/etc/audit/audit.rules line='{{ item }}' create=yes state=present
+    with_items:
+          - '-w /etc/security/opasswd -p wa -k identity'
+          - '-w /etc/selinux/ -p wa -k MAC-policy'
+          - '-w /etc/sudoers -p wa -k scope'
+          - '-w /etc/group -p wa -k identity'
+          - '-w /etc/passwd -p wa -k identity'
+          - '-w /etc/gshadow -p wa -k identity'
+          - '-w /etc/shadow -p wa -k identity'
+          - '-w /var/log/sudo.log -p wa -k actions'
+    notify: restart auditd
