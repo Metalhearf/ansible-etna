@@ -8,6 +8,7 @@
   roles:
     - ssh
     - firewall
+    - fail2ban
   vars:
     - firewall_ssh_port: 2222
 
@@ -18,6 +19,7 @@
   roles:
     - ssh
     - firewall
+    - fail2ban
   vars:
     - firewall_ssh_port: 2222
 
